@@ -166,14 +166,17 @@ func poll_file(rec face.Recognizer, people map[int32]string) {
 	path := filepath.Join("/tmp", "output.jpg")
 	//log.Printf("Catagories: %v", people)
 	var curr_person string
+	var _localRec = rec
 
 	for {
-		_face := face_recognize(rec, path)
-		catagory := rec.Classify(_face.Descriptor)
+		_face := face_recognize(_localRec, path)
+		if _face != nil {
+			catagory := rec.Classify(_face.Descriptor)
 
-		if curr_person != people[int32(catagory)] {
-			log.Printf("Found: %v", people[int32(catagory)])
-			curr_person = people[int32(catagory)]
+			if curr_person != people[int32(catagory)] {
+				log.Printf("Found: %v", people[int32(catagory)])
+				curr_person = people[int32(catagory)]
+			}
 		}
 		time.Sleep(1 * time.Second)
 	}
