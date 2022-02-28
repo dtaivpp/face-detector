@@ -3,12 +3,14 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
+
+	//"fmt"
 	"image"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+
 	"time"
 	"unsafe"
 
@@ -52,66 +54,26 @@ func main() {
 		ingest_samples(rec, test)
 		catagorize_test(rec, test.Catagory2Person)
 	}
+
+	if os.Args[2] == "poll" {
+		rec := get_recognizer()
+		test := load_data()
+		ingest_samples(rec, test)
+		poll_file(rec, test.Catagory2Person)
+	}
+
 }
 
-func image_process() {
-	rec, err := face.NewRecognizer(modelsDir)
-	if err != nil {
-		log.Fatalf("Error creating a recognizer")
-	}
-
-	defer rec.Close()
-
-	testImagePrisin := filepath.Join(imagesDir, "pristin.jpg")
-
-	faces, err := rec.RecognizeFile(testImagePrisin)
-	if err != nil {
-		log.Fatalf("Can't recognize: %v", err)
-	}
-	if len(faces) != 10 {
-		log.Fatalf("Wrong number of faces")
-	}
-
-	var samples []face.Descriptor
-	var cats []int32
-
-	/* 	for i, f := range faces {
-		serialize_face(f, "")
-		samples = append(samples, f.Descriptor)
-		cats = append(cats, int32(i))
-	} */
-
-	labels := []string{
-		"Sungyeon", "Yehana", "Roa", "Eunwoo", "Xiyeon",
-		"Kyulkyung", "Nayoung", "Rena", "Kyla", "Yuha",
-	}
-
-	rec.SetSamples(samples, cats)
-
-	// Now let's try to classify some not yet known image.
-	testImageNayoung := filepath.Join(imagesDir, "nayoung.jpg")
-
-	nayoungFace, err := rec.RecognizeSingleFile(testImageNayoung)
-	if err != nil {
-		log.Fatalf("Can't recognize: %v", err)
-	}
-	if nayoungFace == nil {
-		log.Fatalf("Not a single face on the image")
-	}
-	start := time.Now()
-	catID := rec.Classify(nayoungFace.Descriptor)
-	if catID < 0 {
-		log.Fatalf("Can't classify")
-	}
-	// Code to measure
-	duration := time.Since(start)
-	// Formatted String
-	fmt.Printf("\nClassification Time: %v", duration)
-	fmt.Printf("\nSizeOf (bytes): %v\n", unsafe.Sizeof(rec))
-
-	// Finally print the classified label. It should be "Nayoung".
-	fmt.Println(labels[catID])
+/* 	start := time.Now()
+catID := rec.Classify(nayoungFace.Descriptor)
+if catID < 0 {
+	log.Fatalf("Can't classify")
 }
+// Code to measure
+duration := time.Since(start)
+// Formatted String
+fmt.Printf("\nClassification Time: %v", duration)
+fmt.Printf("\nSizeOf (bytes): %v\n", unsafe.Sizeof(rec)) */
 
 func str2descr(s string) face.Descriptor {
 	b, err := base64.StdEncoding.DecodeString(s)
@@ -197,6 +159,24 @@ func catagorize_test(rec face.Recognizer, people map[int32]string) {
 
 		//log.Printf("ID: %v", catagory)
 		log.Printf("Found: %v", people[int32(catagory)])
+	}
+}
+
+func poll_file(rec face.Recognizer, people map[int32]string) {
+	path := filepath.Join("/tmp", "output.jpg")
+	//log.Printf("Catagories: %v", people)
+	var curr_person string
+
+	for {
+
+		_face := face_recognize(rec, path)
+		catagory := rec.Classify(_face.Descriptor)
+
+		if curr_person != people[int32(catagory)] {
+			log.Printf("Found: %v", people[int32(catagory)])
+			curr_person = people[int32(catagory)]
+		}
+		time.Sleep(1 * time.Second)
 	}
 }
 
