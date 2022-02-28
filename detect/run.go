@@ -168,7 +168,6 @@ func poll_file(rec face.Recognizer, people map[int32]string) {
 	var curr_person string
 
 	for {
-
 		_face := face_recognize(rec, path)
 		catagory := rec.Classify(_face.Descriptor)
 
