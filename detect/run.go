@@ -19,7 +19,7 @@ import (
 
 // Path to directory with models and test images. Here it's assumed it
 // points to the <https://github.com/Kagami/go-face-testdata> clone.
-const dataDir = "go-face-testdata"
+const dataDir = "testdata"
 
 var (
 	modelsDir = filepath.Join(dataDir, "models")
@@ -163,7 +163,7 @@ func catagorize_test(rec face.Recognizer, people map[int32]string) {
 }
 
 func poll_file(rec face.Recognizer, people map[int32]string) {
-	path := filepath.Join("/tmp", "output.jpg")
+	path := filepath.Join("/mnt", "ramdisk", "output.jpg")
 	//log.Printf("Catagories: %v", people)
 	var curr_person string
 	var _localRec = rec
@@ -221,7 +221,8 @@ func train_images() {
 
 // trigger ffmpeg
 /* func ffmpeg_process() {
-	cmnd := exec.Command("ffmpeg", "-y", "-f", "v4l2", "-i", "/dev/video0", "-update", "1", "-r", "1", "/tmp/output.jpg")
+	cmnd := exec.Command("ffmpeg", "-y", "-f", "v4l2", "-i", "/dev/video0", "-update", "1", "-r", "1", "/mnt/ramdisk/output.jpg")
+	// sudo ffmpeg -y -f v4l2 -i /dev/video0 -update 1 -r 1 /mnt/ramdisk/output.jpg
 	//cmnd.Run() // and wait
 	cmnd.Start()
 } */
