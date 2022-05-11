@@ -20,4 +20,8 @@
 # Go workspace file
 go.work
 
-go-face-testdata/*
+testdata/images/*
+
+__debug_bin
+
+face-detector
